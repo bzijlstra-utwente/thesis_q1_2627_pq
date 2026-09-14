@@ -9,12 +9,19 @@ def main():
     # Drop not important columns
     df = df.iloc[:, 0:14]
 
-    # Standardize the columns of the df
-    df_z = pd.DataFrame()
-    for col_name in df.columns:
-        df_z[col_name] = (df[col_name] - df[col_name].mean()) / df[col_name].std()
+    # Do the data processing in NumPy
+    X = df.to_numpy()
 
-    
+    # Standardize the columns
+    mean = np.mean(X, axis=0)
+    std = np.std(X, axis=0, ddof=1)
+    std[std==0] = 1.0
+    Z = (X - mean) / std
+
+    # Get the covariance matrix
+    U, S, Vt = np.linalg.svd(Z, full_matrices=False)
+
+    print(Vt)
 
 
 if __name__ == "__main__":
