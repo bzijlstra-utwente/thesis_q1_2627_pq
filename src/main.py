@@ -91,7 +91,7 @@ def scree_plot(eigenvalues: np.ndarray, threshold: float = 90):
 def standardize(data: np.ndarray) -> np.ndarray:
     mean = np.mean(data, axis=0)
 
-    std = np.std(data, axis=0)
+    std = np.std(data, axis=0, ddof=1)
     std[std == 0] = 1.0
 
     return (data - mean) / std
@@ -108,20 +108,13 @@ def main():
     # Standardize the columns
     Z = standardize(X)
     # Get the covariance matrix
-    C = np.cov(Z.T)
+    C = np.cov(Z.T, ddof=1)
 
     # Get the eigenvectors and -values
     eigenvalues, eigenvectors = np.linalg.eigh(C)
     # Swap to order from low->high to high->low
     eigenvectors = eigenvectors[::-1]
-    eigenvalues = eigenvalues[::-1]
-
-    # Calculate variance explained from the eigenvalues
-    explained_variance = eigenvalues / np.sum(eigenvalues) * 100
-    # Calculate cumulative explained variance
-    cumulative_variance = np.cumsum(explained_variance)
-    # Find number of components to reach the threshold
-    n_components = int(np.argmax(cumulative_variance >= THRESHOLD) + 1)
+    eigenvalues = eigenvalues[:,::-1]
 
 
 if __name__ == "__main__":
