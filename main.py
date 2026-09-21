@@ -2,6 +2,7 @@ import numpy as np
 import pandas as pd
 
 DATA_PATH = "data/example_data.xlsx"
+THRESHOLD = 0.9
 
 def main():
     df = pd.read_excel(DATA_PATH)
@@ -21,7 +22,17 @@ def main():
     # Get the covariance matrix
     U, S, Vt = np.linalg.svd(Z, full_matrices=False)
 
-    print(Vt)
+    # Get the number of PCs to get a contained variance of >= 0.9
+    contained_variance = 0
+    num_pc = 0
+    while contained_variance < 0.9:
+        num_pc += 1
+        contained_variance = sum(S[:num_pc]) / sum(S)
+       
+    # print(contained_variance)
+    # print(num_pc)
+
+    print(Vt.shape)
 
 
 if __name__ == "__main__":
