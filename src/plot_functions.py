@@ -1,6 +1,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
 import seaborn as sns
+from scipy.stats import norm
 
 
 def scree_plot(eigenvalues: np.ndarray, threshold: float = 90):
@@ -107,4 +108,177 @@ def cov_matrix_plot(cov_matrix: np.ndarray, parameter_names: list[str]) -> None:
     plt.xlabel("Variables")
     plt.ylabel("Variables")
     plt.tight_layout()
+    plt.show()
+
+
+def plot_signals_over_time(
+    signals: np.ndarray,
+    time: np.ndarray,
+    signal_titles: list[str] | None = None,
+    ncols: int = 2,
+) -> None:
+    """
+    Plot signals over time.
+
+    Parameters
+    ----------
+    signals : np.ndarray
+        Array of shape (n, p), where p is the number of signals.
+        A maximum of 14 signals is allowed.
+
+    time : np.ndarray
+        Array of shape (n,) containing the time values.
+
+    signal_titles : list[str] | None
+        List of strings which are the corresponding titles of the sub-plot for the plotted signals.
+        If no list is provided, the default sub-plot title will be 'Signal [i]'.
+
+    ncols : int
+        Sets the number of columns for the sub-plots. The default number of columns is 2.
+    """
+
+    # Validate inputs
+    if signals.ndim != 2:
+        raise ValueError("signals must have shape (n, p)")
+
+    if time.ndim != 1:
+        raise ValueError("time must have shape (n,)")
+
+    n, p = signals.shape
+
+    if p > 14:
+        raise ValueError("A maximum of 14 signals is allowed.")
+
+    if time.shape[0] != n:
+        raise ValueError(
+            "The number of time points must match the number of parameter values."
+        )
+
+    if signal_titles and len(signal_titles) != p:
+        raise ValueError(
+            "The number of parameter names must match the number of signals"
+        )
+
+    nrows = int(np.ceil(p / ncols))
+
+    fig, axes = plt.subplots(
+        nrows,
+        ncols,
+        figsize=(12, 3 * nrows),
+        sharex=True,
+    )
+
+    # Make axes iterable even if there is only one subplot
+    axes = np.atleast_1d(axes).ravel()
+
+    for i in range(p):
+        axes[i].plot(time, signals[:, i])
+
+        if signal_titles is None:
+            axes[i].set_title(f"Signal {i + 1}")
+        else:
+            axes[i].set_title(signal_titles[i])
+        axes[i].set_ylabel("Value")
+        axes[i].grid(True, alpha=0.3)
+
+    # Hide unused subplots
+    for i in range(p, len(axes)):
+        axes[i].set_visible(False)
+
+    # Only the bottom row needs the x-label
+    for ax in axes[-ncols:]:
+        ax.set_xlabel("Time")
+
+    fig.suptitle("signals over time")
+    fig.tight_layout()
+
+    plt.show()
+
+
+def plot_distributions(data: np.ndarray) -> None:
+    """
+    Plot the probability density distributions of multiple parameters.
+
+    A histogram normalized to probability density is plotted for each
+    parameter. A normal distribution fitted to the parameter data is
+    overlaid as a line.
+
+    Parameters
+    ----------
+    data : np.ndarray
+        Array with shape (p, n), where p is the number of parameters
+        and n is the number of observations. A maximum of 14 parameters
+        is allowed.
+
+    Raises
+    ------
+    ValueError
+        If data does not have shape (p, n) or contains more than
+        14 parameters.
+    """
+
+    if data.ndim != 2:
+        raise ValueError("data must have shape (p, n)")
+
+    p, _ = data.shape
+
+    if p > 14:
+        raise ValueError("A maximum of 14 parameters is allowed.")
+
+    ncols = 2
+    nrows = int(np.ceil(p / ncols))
+
+    fig, axes = plt.subplots(
+        nrows,
+        ncols,
+        figsize=(12, 3 * nrows),
+    )
+
+    axes = np.atleast_1d(axes).ravel()
+
+    for i in range(p):
+        # Plot probability density
+        axes[i].hist(
+            data[i],
+            bins=30,
+            density=True,
+            edgecolor="black",
+            alpha=0.7,
+            label="Data",
+        )
+
+        # Fit normal distribution
+        mu, sigma = norm.fit(data[i])
+
+        # Create x-values for normal distribution
+        x = np.linspace(
+            data[i].min(),
+            data[i].max(),
+            200,
+        )
+
+        # Calculate probability density
+        pdf = norm.pdf(x, mu, sigma)
+
+        # Plot normal distribution
+        axes[i].plot(
+            x,
+            pdf,
+            linewidth=2,
+            label=f"Normal ($\\mu$={mu:.2f}, $\\sigma$={sigma:.2f})",
+        )
+
+        axes[i].set_title(f"Parameter {i + 1}")
+        axes[i].set_xlabel("Value")
+        axes[i].set_ylabel("Probability density")
+        axes[i].grid(True, alpha=0.3)
+        axes[i].legend()
+
+    # Hide unused subplots
+    for i in range(p, len(axes)):
+        axes[i].set_visible(False)
+
+    fig.suptitle("Parameter distributions")
+    fig.tight_layout()
+
     plt.show()
