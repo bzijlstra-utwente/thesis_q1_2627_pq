@@ -1,6 +1,6 @@
 import numpy as np
 
-from src.main import standardize
+from src.pca import standardize
 
 
 def test_standardize_mean():

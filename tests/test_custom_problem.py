@@ -1,6 +1,6 @@
 import numpy as np
 
-from src.main import pca
+from src.pca import pca
 
 
 def test_custom_problem():
