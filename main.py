@@ -1,6 +1,10 @@
 import pandas as pd
 
-from src.pca import pca, standardize
+from src.pca import (
+    compute_correlation_metric,
+    get_significant_principal_components,
+    pca,
+)
 from src.plot_functions import (
     cov_matrix_plot,
     plot_distributions,
@@ -12,7 +16,7 @@ DATA_PATH = "data/example_data.xlsx"
 THRESHOLD = 0.9
 
 
-def main():
+def algorithm():
     df = pd.read_excel(DATA_PATH)
 
     # Get the timestamp for each measurement
@@ -21,21 +25,13 @@ def main():
     df_parameters = df.iloc[:, 0:14]
     data = df_parameters.to_numpy()
 
-    cov_matrix, eigenvalues, eigenvectors = pca(data)
+    _, eigenvalues, eigenvectors = pca(data)
 
-    # cov_matrix_plot(cov_matrix, list(df.columns))
-    # scree_plot(eigenvalues)
-    # plot_parameters_over_time(data, epoch_times, list(df_parameters.columns))
+    principal_components = get_significant_principal_components(
+        eigenvectors, eigenvalues
+    )
 
-    # # BlaBla
-    # Z = standardize(data)
-    # pca_dimensions = Z @ eigenvectors
-    # plot_signals_over_time(
-    #     pca_dimensions, epoch_times, [f"PC {i}" for i in range(1, 15)]
-    # )
-
-    plot_distributions(data.T)
-
+    compute_correlation_metric(data, principal_components, eigenvalues)
 
 if __name__ == "__main__":
-    main()
+    algorithm()
