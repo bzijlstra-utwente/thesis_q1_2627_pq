@@ -282,3 +282,77 @@ def plot_distributions(data: np.ndarray) -> None:
     fig.tight_layout()
 
     plt.show()
+
+
+def plot_number_grid(
+    data: np.ndarray,
+    labels_y: list[str] | None = None,
+    add_pc_labels_x: bool = True,
+    title: str | None = None,
+    numbers_in_cell: bool = False,
+    ax=None,
+):
+
+    single_plot = None
+    if ax is None:
+        fig, ax = plt.subplots()
+        single_plot = True
+    else:
+        fig = ax.figure
+        single_plot = False
+
+    image = ax.imshow(data, cmap="RdBu_r")
+
+    # Add numbers to each cell
+    if numbers_in_cell:
+        for i in range(data.shape[0]):
+            for j in range(data.shape[1]):
+                ax.text(j, i, f"{data[i, j]:.1f}", ha="center", va="center")
+
+    # Add grid lines
+    ax.set_xticks(np.arange(-0.5, data.shape[1], 1), minor=True)
+    ax.set_yticks(np.arange(-0.5, data.shape[0], 1), minor=True)
+    ax.grid(which="minor", color="black", linewidth=1)
+    ax.tick_params(which="minor", bottom=False, left=False)
+
+    # Add labels to the y-axis
+    if labels_y:
+        ax.set_yticks(np.arange(len(labels_y)))
+        ax.set_yticklabels(labels_y)
+
+    # Add labels to the x-axis
+    if add_pc_labels_x:
+        ax.set_xticks(np.arange(data.shape[1]))
+        ax.set_xticklabels(
+            [f"PC {i}" for i in range(1, data.shape[1] + 1)], rotation=45, ha="right"
+        )
+
+    # Add title
+    if title:
+        ax.set_title(title, x=-0.2, fontweight="bold")
+
+    if single_plot:
+        # Colorbar
+        cbar = fig.colorbar(image, ax=ax)
+        cbar.set_label(r"$r \times \%var$")
+
+        plt.show()
+
+    return ax
+
+
+def plot_multiple_number_grids(data: np.ndarray, labels_y: list[str]):
+    _, axes = plt.subplots(3, 1, figsize=(8, 12))
+
+    plot_number_grid(data, labels_y, ax=axes[0], title="TEST1")
+    plot_number_grid(data, labels_y, ax=axes[1], title="TEST2")
+    plot_number_grid(data, labels_y, ax=axes[2], title="TEST3")
+
+    # Only show x-axis labels on bottom plot
+    axes[0].tick_params(axis="x", labelbottom=False)
+    axes[1].tick_params(axis="x", labelbottom=False)
+    axes[0].tick_params(axis="x", bottom=False)
+    axes[1].tick_params(axis="x", bottom=False)
+
+    plt.tight_layout()
+    plt.show()
