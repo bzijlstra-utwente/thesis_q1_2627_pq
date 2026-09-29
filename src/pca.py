@@ -60,15 +60,17 @@ def calculate_explained_variance(
 
 def pca(data: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
     """
-    Perfoms the core of the Principal Component Analysis (PCA) algorithm.
+    Perfoms the Principal Component Analysis (PCA) algorithm.
 
-    First the data is standardized. Then the covariance matrix is calculated.
-
-    The eigenvectors of the covariance matrix are the Principal Components (PC).
-    The eigenvalues determine the significance of each PC.
-
-    The explained variance is calculated with the eigenvalues.
-    As well as the number of significan PCs.
+    The algorithm consists of the following steps:
+        - Step 1: Standardize the data
+        - Step 2: Calculate the covariance matrix
+        - Step 3: Calculate the eigenvalues and eigenvectors of the covariance matrix
+            - The eigenvectors are the Principal Components (PC)
+            - The eigenvalues determine the significance of each PC
+        - Step 3.5: Swap the order of the eigenvalues and -vectors
+            - because np.linalg.eigh returns them from low->high and they are needed from high->low
+        - Step 4: Calculate the number of PCs needed to reach an explained variance threshold (of 90%)
 
     Parameters
     ----------
@@ -129,12 +131,14 @@ def compute_correlation_metric(
     # Project measurment data to PCA space
     Z = standardize(data)  # Why use standardized data for projection?
     projected_data = Z @ significant_pc
+
     # Calculate Pearson correlation between all parameters and PCs
     pearson_correlation_factors = np.empty((data.shape[1], projected_data.shape[1]))
     for i, parameter in enumerate(data.T):
         for j, pc in enumerate(projected_data.T):
             result = pearsonr(parameter, pc)
             pearson_correlation_factors[i][j] = result.correlation
+
     # Multiply the Pearson correlation factor (r) with the explained variance of each PC
     correlation_metric = np.empty(pearson_correlation_factors.shape)
     for i, col in enumerate(pearson_correlation_factors.T):
