@@ -329,7 +329,10 @@ def plot_number_grid(
 
     # Add title
     if title:
-        ax.set_title(title, x=-0.2, fontweight="bold")
+        if single_plot:
+            ax.set_title(title, fontweight="bold")
+        else:
+            ax.set_title(title, x=-0.2, fontweight="bold")
 
     if single_plot:
         # Colorbar

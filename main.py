@@ -2,7 +2,6 @@ import pandas as pd
 
 from src.pca import (
     compute_correlation_metric,
-    get_significant_principal_components,
     pca,
 )
 from src.plot_functions import (
@@ -42,15 +41,12 @@ def algorithm():
     df_parameters = df.iloc[:, 0:14]
     data = df_parameters.to_numpy()
 
-    _, eigenvalues, eigenvectors = pca(data)
-
-    principal_components = get_significant_principal_components(
-        eigenvectors, eigenvalues
-    )
+    explained_variance, principal_components = pca(data)
 
     correlation_metric_matrix = compute_correlation_metric(
-        data, principal_components, eigenvalues
+        data, principal_components, explained_variance
     )
+
     plot_number_grid(
         correlation_metric_matrix,
         list(ABBREVATIONS_COLUMN_NAMES.values()),
