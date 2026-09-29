@@ -51,14 +51,14 @@ def algorithm():
     correlation_metric_matrix = compute_correlation_metric(
         data, principal_components, eigenvalues
     )
-    # plot_number_grid(
-    #     correlation_metric_matrix,
-    #     list(ABBREVATIONS_COLUMN_NAMES.values()),
-    #     title="TEST TITLE",
-    # )
-    plot_multiple_number_grids(
-        correlation_metric_matrix, list(ABBREVATIONS_COLUMN_NAMES.values())
+    plot_number_grid(
+        correlation_metric_matrix,
+        list(ABBREVATIONS_COLUMN_NAMES.values()),
+        title="TEST TITLE",
     )
+    # plot_multiple_number_grids(
+    #     correlation_metric_matrix, list(ABBREVATIONS_COLUMN_NAMES.values())
+    # )
 
 
 if __name__ == "__main__":

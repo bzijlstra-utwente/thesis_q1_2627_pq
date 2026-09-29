@@ -11,7 +11,7 @@ def standardize(data: np.ndarray) -> np.ndarray:
     return (data - mean) / std
 
 
-def get_num_components(eigenvalues: np.ndarray, threshold: float = 90) -> int:
+def calculate_explained_variance(eigenvalues: np.ndarray, threshold: float = 90) -> tuple[np.ndarray, np.ndarray, int]:
     # Calculate variance explained from the eigenvalues
     explained_variance = eigenvalues / np.sum(eigenvalues) * 100
     # Calculate cumulative explained variance
@@ -19,7 +19,7 @@ def get_num_components(eigenvalues: np.ndarray, threshold: float = 90) -> int:
     # Find number of components to reach the threshold
     n_components = int(np.argmax(cumulative_variance >= threshold) + 1)
 
-    return n_components
+    return explained_variance, cumulative_variance, n_components
 
 
 def pca(data: np.ndarray) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
@@ -40,7 +40,7 @@ def pca(data: np.ndarray) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
 def get_significant_principal_components(
     eigenvectors: np.ndarray, eigenvalues: np.ndarray
 ) -> np.ndarray:
-    n_components = get_num_components(eigenvalues)
+    _, _, n_components = calculate_explained_variance(eigenvalues)
     significant_pc = eigenvectors[:, :n_components]
 
     return significant_pc
@@ -59,8 +59,9 @@ def compute_correlation_metric(
             result = pearsonr(parameter, pc)
             pearson_correlation[i][j] = result.correlation
     # Multiply the Pearson correlation factor (r) with the explained varaince of each PC
+    explained_variance, _, _ = calculate_explained_variance(eigenvalues)
     correlation_metric = np.empty(pearson_correlation.shape)
     for i, col in enumerate(pearson_correlation.T):
-        correlation_metric[:, i] = col * eigenvalues[i]
+        correlation_metric[:, i] = col * explained_variance[i]
 
     return correlation_metric
