@@ -1,1 +1,1 @@
-![diagram of algorithm](./docs/images/v3_data_flow.png?)
+![diagram of algorithm](./docs/images/v3_data_flow.png)
